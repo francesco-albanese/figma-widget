@@ -1,0 +1,89 @@
+<div>
+  <div><input id="search" type="text" placeholder="Search..." /></div>
+  <div class="searchItemContainer">
+    <div class="searchItemsWrapper">
+    </div>
+  </div>
+</div>
+<style>
+  .searchItemsWrapper {
+    display: flex;
+    height: 150px;
+    flex-direction: column;
+    max-width: 150px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    max-height: 300px;
+  }
+</style>
+<script>
+  let GSHEET_DATA = [];
+  let COMPONENT_ID = "";
+
+  const input = document.querySelector("#search");
+  input.addEventListener("keyup", (e) => {
+    const itemSearchValue = e.target.value;
+    const newGsheetData = GSHEET_DATA.filter((componentid) =>
+      componentid.match(new RegExp(itemSearchValue, 'i'))
+    );
+    const searchItems = generateSearchItems(newGsheetData);
+    appendSearchItems(searchItems);
+    attachListenersToSearchItems(searchItems, COMPONENT_ID);
+  });
+
+  function appendSearchItems(searchItems) {
+    const searchItemsWrapper = document.querySelector('.searchItemsWrapper');
+    searchItemsWrapper.innerHTML = "";
+    searchItemsWrapper.innerHTML = searchItems;
+  }
+
+  function handleClick(id) {
+    return e => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const message = {
+        pluginMessage: {
+          type: 'searchitemselection',
+          id: `${String(id)}`,
+          value: e.target.innerText
+        }
+      };
+      parent.postMessage(message, '*');
+    }
+  }
+
+  function attachListenersToSearchItems(searchItems, id) {
+    const items = document.querySelectorAll(".searchitem");
+    items.forEach(item => {
+      item.removeEventListener("click", handleClick(id));
+      item.addEventListener("click", handleClick(id));
+    });
+  }
+
+  const generateSearchItems = (data) => {
+    const searchItems = data
+      .map((componentId) => {
+        return (
+          '<div style="cursor:pointer; padding: 3px; margin-bottom: 2px;" class="searchitem">' +
+          componentId +
+          '</div>'
+        );
+      });
+    return searchItems;
+  };
+
+  window.onmessage = ({
+    data: {
+      pluginMessage: {
+        id,
+        gsheetData
+      }
+    }
+  }) => {
+    GSHEET_DATA = [...new Set(gsheetData)];
+    COMPONENT_ID = id;
+    const searchItems = generateSearchItems(GSHEET_DATA);
+    appendSearchItems(searchItems);
+    attachListenersToSearchItems(searchItems, COMPONENT_ID);
+  }
+</script>

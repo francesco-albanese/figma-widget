@@ -1,0 +1,18 @@
+{
+  "name": "Flex Spec",
+  "id": "1148758633397042758",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "permissions": [
+    "currentuser",
+    "activeusers"
+  ],
+  "ui": {
+    "gsheetData": "gsheetData.html"
+  },
+  "containsWidget": true,
+  "widgetApi": "1.0.0"
+}
